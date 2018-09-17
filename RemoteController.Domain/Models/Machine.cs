@@ -11,7 +11,7 @@ namespace RemoteController.Domain.Models
         public string IpAddress { get; set; }
         public string Antivirus { get; set; }
         public bool IsFirewallActive { get; set; }
-        public bool IsAvailiable { get; set; }
+        public bool IsAvailable { get; set; }
         public string WindowsVersion { get; set; }
         public string DotNetFrameworkVersion { get; set; }
         public double SpaceHdUsed { get; set; }

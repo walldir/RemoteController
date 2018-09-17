@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using RemoteController.Application.Interfaces;
@@ -34,12 +35,18 @@ namespace RemoteController.Application.Services
 
         public IEnumerable<MachineViewModel> GetAll()
         {
-            return _machineRepository.GetAll().ProjectTo<MachineViewModel>();
+            var machines = _mapper.Map<IEnumerable<Machine>, IEnumerable<MachineViewModel>>(_machineRepository.GetAll());
+            return machines;
         }
 
         public MachineViewModel GetById(Guid id)
         {
             return _mapper.Map<MachineViewModel>(_machineRepository.GetById(id));
+        }
+
+        public async Task<MachineViewModel> GetByIdAsync(Guid id)
+        {
+            return _mapper.Map<MachineViewModel>(await _machineRepository.GetByIdAsync(id));
         }
 
         public void Update(MachineViewModel machineViewModel)
@@ -51,6 +58,16 @@ namespace RemoteController.Application.Services
         public void Remove(Guid id)
         {
             _machineRepository.Remove(id);
+        }
+
+        public bool Any(Expression<Func<Machine, bool>> predicate)
+        {
+            return _machineRepository.Any(predicate);
+        }
+
+        public async Task<bool> AnyAsync(Expression<Func<Machine, bool>> predicate)
+        {
+            return await _machineRepository.AnyAsync(predicate);
         }
     }
 }

@@ -25,8 +25,7 @@ namespace RemoteController.Application.ViewModels
         public bool IsFirewallActive { get; set; }
 
         [DisplayName("Maquina disponível?")]
-
-        public bool IsAvailiable { get; set; }
+        public bool IsAvailable { get; set; }
 
         [DisplayName("Versão do Windows")]
         public string WindowsVersion { get; set; }
@@ -34,8 +33,8 @@ namespace RemoteController.Application.ViewModels
         [DisplayName("Versão do .NET Framework")]
         public string DotNetFrameworkVersion { get; set; }
 
-        [DisplayName("Espaço livre no HD")]
-        public double SpaceHdAvaliable { get; set; }
+        [DisplayName("Espaço usado no HD")]
+        public double SpaceHdUsed { get; set; }
 
         [DisplayName("Espaço total do HD")]
         public double HdSize { get; set; }

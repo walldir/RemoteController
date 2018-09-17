@@ -1,9 +1,14 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RemoteController.Data.Context;
+using RemoteController.IoC;
+using RemoteController.Web.Hubs;
 
 namespace RemoteController.Web
 {
@@ -19,13 +24,22 @@ namespace RemoteController.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<RemoteControllerContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            //services.AddAutoMapperSetup();
+            services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSignalR();
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+
+            RegisterServices(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +78,16 @@ namespace RemoteController.Web
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<MachineHub>("/hub");
+            });
+        }
+
+        private static void RegisterServices(IServiceCollection services)
+        {
+            DependencyInjectionBootstrapper.RegisterServices(services);
         }
     }
 }

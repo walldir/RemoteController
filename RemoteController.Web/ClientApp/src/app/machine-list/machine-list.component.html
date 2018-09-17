@@ -1,0 +1,42 @@
+<table class="table">
+  <thead>
+  <tr>
+    <th></th>
+    <th>Nome</th>
+    <th>Endereço MAC</th>
+    <th>Endereço IP</th>
+    <th>Antivirus</th>
+    <th>Firewall Ativo</th>
+    <th>Versão do Windows</th>
+    <th>Versão do .NET Framework</th>
+    <th>Espaço em uso do HD</th>
+    <th>Espaço do HD</th>
+    <th>Status</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let machine of machines">
+    <td><input type="checkbox" [disabled]="!machine.isAvailable"/></td>
+    <td>{{machine.name}}</td>
+    <td>{{machine.macAddress}}</td>
+    <td>{{machine.ipAddress}}</td>
+    <td>{{machine.antivirus}}</td>
+    <td>
+      <span *ngIf="machine.isFirewallActive">Sim</span>
+      <span *ngIf="!machine.isFirewallActive">Não</span>
+    </td>
+    <td>{{machine.windowsVersion}}</td>
+    <td>{{machine.dotNetFrameworkVersion}}</td>
+    <td>{{machine.spaceHdUsed}}</td>
+    <td>{{machine.hdSize}}</td>
+    <td>
+      <span *ngIf="machine.isAvailable" style="color:green">Ativo</span>
+      <span *ngIf="!machine.isAvailable" style="color:red">Inativo</span>
+    </td>
+    <td>
+      <a href="#" target="_blank">Ver Log de Execução</a>
+    </td>
+  </tr>
+  </tbody>
+</table>

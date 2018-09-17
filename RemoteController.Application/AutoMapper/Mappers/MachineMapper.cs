@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using RemoteController.Application.ViewModels;
+using RemoteController.Domain.Models;
 
 namespace RemoteController.Application.AutoMapper.Mappers
 {
@@ -7,9 +8,11 @@ namespace RemoteController.Application.AutoMapper.Mappers
     {
         public MachineMapper()
         {
-            CreateMap<MachineMapper, MachineViewModel>();
+            CreateMap<Machine, MachineViewModel>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-            CreateMap<MachineViewModel, MachineMapper>();
+            CreateMap<MachineViewModel, Machine>()
+                .ForMember(dest => dest.Logs, opt => opt.Ignore());
         }
     }
 }

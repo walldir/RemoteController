@@ -10,6 +10,7 @@ namespace RemoteController.Application.AutoMapper
             return new MapperConfiguration(config =>
             {
                 config.AddProfile(new MachineMapper());
+                config.AddProfile(new LogMapper());
             });
         }
     }

@@ -28,11 +28,11 @@ namespace RemoteController.Data.Mappings
                 .HasMaxLength(150);
 
             builder.Property(m => m.IsFirewallActive)
-                .HasDefaultValue("0")
+                .HasDefaultValue(false)
                 .IsRequired();
 
-            builder.Property(m => m.IsAvailiable)
-                .HasDefaultValue("0")
+            builder.Property(m => m.IsAvailable)
+                .HasDefaultValue(false)
                 .IsRequired();
 
             builder.Property(m => m.WindowsVersion)

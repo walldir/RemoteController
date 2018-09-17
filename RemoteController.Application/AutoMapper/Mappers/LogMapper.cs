@@ -8,7 +8,9 @@ namespace RemoteController.Application.AutoMapper.Mappers
     {
         public LogMapper()
         {
-            CreateMap<Log, LogViewModel>();
+            CreateMap<Log, LogViewModel>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
             CreateMap<LogViewModel, Log>();
         }
     }
