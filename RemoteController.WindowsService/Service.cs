@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json;
 using PeterKottas.DotNetCore.WindowsService.Base;
 using PeterKottas.DotNetCore.WindowsService.Interfaces;
+using RemoteController.Application.ViewModels;
 using RemoteController.Domain.Interfaces;
 
 namespace RemoteController.WindowsService
@@ -14,7 +14,7 @@ namespace RemoteController.WindowsService
     {
         private readonly IMicroServiceController _microServiceController;
         private readonly IPowerShellWorker _powerShellWorker;
-        private static HubConnection _connection;
+        private static HubConnection _hubConnection;
 
         public Service(IMicroServiceController microServiceController ,IPowerShellWorker powerShellWorker)
         {
@@ -26,65 +26,51 @@ namespace RemoteController.WindowsService
         {
             StartBase();
 
-            _connection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:44393/hub")
-                .Build();
+            Task.Run(async () =>
+            {
+                await ConnectToServer();
 
-            var teste = new Thread(async () =>
-                await ConnectToServer()
-            ); 
+                MachineViewModel machineViewModel = new MachineViewModel
+                {
+                    Name = MachineInformation.Name(),
+                    IpAddress = MachineInformation.IpAddress(),
+                    MacAddress = MachineInformation.MacAddress(),
+                    WindowsVersion = MachineInformation.WindowsVersion()
+                };
 
-            teste.Start();
+                var jsonObject = JsonConvert.SerializeObject(machineViewModel);
 
-            //_powerShellWorker.ReadOutput();
+                await _hubConnection.InvokeAsync("SetMachine", jsonObject);
 
-            //Timers.Start("Commands", 200, () =>
-            //{
-            //    powerShell.ReadOutput();
-            //});
+                Timers.Start("ReadCommands", 200, () =>
+                {
+                    if (_powerShellWorker.OutputResult.Any())
+                    {
+                        _hubConnection.InvokeAsync("CommandResult", _powerShellWorker.OutputResult);
+                        _powerShellWorker.OutputResult.Clear();
+                    }
+                });
+            });
 
-            //Timers.Start("Poller", 1000, () =>
-            //{
-            //    Console.WriteLine($"Polling at {DateTime.Now:o}");
-            //});
+            _powerShellWorker.ReadOutput();
         }
 
         public void Stop()
         {
+            Task.Run(async () => await _hubConnection.DisposeAsync());
+
             StopBase();
-            Console.WriteLine("Stopped");
         }
 
-        public static async Task<int> ConnectToServer()
+        public static async Task ConnectToServer()
         {
-            var baseUrl = "http://localhost:44393/hub";
+            var baseUrl = "http://localhost:61481/hub";
 
-            Console.WriteLine("Conectando ao servidor");
-
-            var httpConnection = new HttpConnection(new Uri(baseUrl));
-
-            var connection = new HubConnectionBuilder()
+            _hubConnection = new HubConnectionBuilder()
                 .WithUrl(baseUrl)
                 .Build();
 
-            try
-            {
-                await connection.StartAsync();
-
-                Console.WriteLine("------ Connectado ao servidor ---------");
-            }
-            catch (AggregateException aex) when (aex.InnerExceptions.All(e => e is OperationCanceledException))
-            {
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            finally
-            {
-                await connection.DisposeAsync();
-            }
-
-            return 0;
+            await _hubConnection.StartAsync();
         }
     }
 }

@@ -27,11 +27,18 @@ namespace RemoteController.Web
             services.AddDbContext<RemoteControllerContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            //services.AddAutoMapperSetup();
             services.AddAutoMapper();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddSignalR();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -59,6 +66,11 @@ namespace RemoteController.Web
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<MachineHub>("/hub");
+            });
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -77,11 +89,6 @@ namespace RemoteController.Web
                 {
                     spa.UseAngularCliServer(npmScript: "start");
                 }
-            });
-
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<MachineHub>("/hub");
             });
         }
 

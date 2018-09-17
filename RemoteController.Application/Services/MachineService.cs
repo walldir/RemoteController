@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using RemoteController.Application.Interfaces;
 using RemoteController.Application.ViewModels;
 using RemoteController.Domain.Interfaces;
@@ -47,6 +46,11 @@ namespace RemoteController.Application.Services
         public async Task<MachineViewModel> GetByIdAsync(Guid id)
         {
             return _mapper.Map<MachineViewModel>(await _machineRepository.GetByIdAsync(id));
+        }
+
+        public MachineViewModel GetByMacAdress(string macAddress)
+        {
+            return _mapper.Map<MachineViewModel>(_machineRepository.GetByMacAdress(macAddress));
         }
 
         public void Update(MachineViewModel machineViewModel)

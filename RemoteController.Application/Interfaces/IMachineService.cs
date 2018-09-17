@@ -14,6 +14,7 @@ namespace RemoteController.Application.Interfaces
         IEnumerable<MachineViewModel> GetAll();
         MachineViewModel GetById(Guid id);
         Task<MachineViewModel> GetByIdAsync(Guid id);
+        MachineViewModel GetByMacAdress(string macAddress);
         void Update(MachineViewModel machineViewModel);
         void Remove(Guid id);
         bool Any(Expression<Func<Machine, bool>> predicate);

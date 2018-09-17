@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using RemoteController.Domain.Interfaces;
 
 namespace RemoteController.WindowsService
@@ -11,8 +8,12 @@ namespace RemoteController.WindowsService
     {
         private readonly Process _powerShellProcess;
 
+        public List<string> OutputResult { get; set; }
+
         public PowerShellWorker()
         {
+            OutputResult = new List<string>();
+
             _powerShellProcess = new Process
             {
                 StartInfo =
@@ -29,9 +30,9 @@ namespace RemoteController.WindowsService
             };
 
             _powerShellProcess.Start();
-            ReadInput("dir");
-            ReadInput("cd");
         }
+
+        
 
         public void ReadInput(string command)
         {
@@ -47,7 +48,7 @@ namespace RemoteController.WindowsService
             {
                 if (outputLine.Data == null) return;
 
-                Console.WriteLine(outputLine.Data);
+                OutputResult.Add(outputLine.Data);
             };
         }
     }

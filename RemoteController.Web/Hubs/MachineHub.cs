@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
+using RemoteController.Application.Interfaces;
+using RemoteController.Application.ViewModels;
+using RemoteController.Domain.Interfaces;
 
 namespace RemoteController.Web.Hubs
 {
@@ -10,27 +14,56 @@ namespace RemoteController.Web.Hubs
         private static readonly HubMannager<string> Connections =
             new HubMannager<string>();
 
+        private static readonly List<string> ReceivedResults  = new List<string>();
+
+        private readonly IMachineService _machineService;
+        private readonly IUnitOfWork _uof;
+
+        public MachineHub(IMachineService machineService, IUnitOfWork uof)
+        {
+            _machineService = machineService;
+            _uof = uof;
+        }
+
+
         public async Task SendCommand(List<string> clients, string command)
         {
             await Clients.Users(clients).SendAsync("ExecuteCommand", command);
         }
 
-        //public override async Task OnConnectedAsync()
-        //{
-        //    var name = Context.User.Identity.Name;
+        public void CommandResult(List<string> results)
+        {
+            ReceivedResults.AddRange(results);
+        }
 
-        //    Connections.Add(name, Context.ConnectionId);
+        public void SetMachine(string jsonObject)
+        {
+            var machineViewModel = JsonConvert.DeserializeObject<MachineViewModel>(jsonObject);
 
-        //    await base.OnConnectedAsync();
-        //}
+            if (_machineService.GetByMacAdress(machineViewModel.MacAddress) != null)
+            {
+                _machineService.Update(machineViewModel);
+            }
+            else
+            {
+               _machineService.Add(machineViewModel);
+            }
 
-        //public override async Task OnDisconnectedAsync(Exception exception)
-        //{
-        //    string name = Context.User.Identity.Name;
+            _uof.Commit();
+        }
 
-        //    Connections.Remove(name, Context.ConnectionId);
+        public override async Task OnConnectedAsync()
+        {
+            Connections.Add(Context.ConnectionId);
 
-        //    await base.OnDisconnectedAsync(exception);
-        //}
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            Connections.Remove(Context.ConnectionId);
+
+            await base.OnDisconnectedAsync(exception);
+        }
     }
 }
